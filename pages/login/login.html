@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+<h1>Login</h1>
+<div class="login-box">
+    <input class="form-input-big" id="input-username" type="text" value="" placeholder="Enter your username"><br>
+    <input class="form-input-big" id="input-password" type="password" value="" placeholder="Enter your password"><br>
+    <button class="form-button-big" id="btn-login" onclick="doLogin()">Login</button>
+</div>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/shared/js/globSocket.js"></script>
+<script src="/shared/js/socketConvo.js"></script>
+<script src="/shared/js/sessionCheck.js"></script>
+<script src="/shared/js/nav.js"></script>
+<script src="./login.js"></script>
+</html>

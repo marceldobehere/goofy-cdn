@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Goofy CDN</title>
+</head>
+<body>
+    <h1>Goofy CDN</h1>
+    <p>HELLO!</p>
+    <input type="file" onchange="upload(this.files)" />
+    <div>
+        <p>Files uploaded:</p>
+        <ul id="file-list">
+        </ul>
+    </div>
+
+    <br><br>
+    <hr>
+    <button id="btn-logout" onclick="doLogout()">Logout</button>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/shared/js/globSocket.js"></script>
+<script src="/shared/js/socketConvo.js"></script>
+<script src="/shared/js/sessionCheck.js"></script>
+<script src="/shared/js/nav.js"></script>
+<script src="./index.js"></script>
+</html>
