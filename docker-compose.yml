@@ -1,0 +1,19 @@
+version: "3.3"
+services:
+  goofy_cdn:
+    container_name: goofy_cdn
+    build: .
+    volumes:
+      - "/etc/letsencrypt:/etc/letsencrypt"
+      - "./data:/srv/data"
+    networks:
+      - "nginx-router_default"
+      - "default"
+    restart: always
+
+volumes:
+  data:
+networks:
+  default:
+  nginx-router_default:
+    external: true
