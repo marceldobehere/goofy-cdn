@@ -26,7 +26,7 @@ function clearFileList()
 }
 clearFileList();
 
-async function uploadFile(file)
+async function uploadFile(file, pass)
 {
     console.log("Uploading file: ", file);
     let filename = file.name;
@@ -44,7 +44,11 @@ async function uploadFile(file)
         return {error: "Failed to read file"};
     }
 
-    let reply = await msgSendAndGetReply("upload", {"filename":filename, "data":data});
+    let fileObj = {"filename":filename, "data":data};
+    if (pass != undefined)
+        fileObj["password"] = pass;
+
+    let reply = await msgSendAndGetReply("upload", fileObj);
     if (reply["error"] != undefined)
         return {error: reply["error"]};
     console.log("RES: ", reply);
@@ -52,8 +56,9 @@ async function uploadFile(file)
     return {url: reply["url"]};
 }
 
-async function upload(files) {
-    console.log(files);
+async function upload(files, pass) {
+    if (files.length === 0)
+        return alert('No files selected!');
     for (let i = 0; i < files.length; i++)
     {
         let file = files[i];
@@ -72,7 +77,7 @@ async function upload(files) {
         fLink.textContent = "Uploading...";
         fLink.href = "/";
 
-        let res = await uploadFile(file);
+        let res = await uploadFile(file, pass);
         if (res["error"] != undefined)
         {
             fLink.textContent = "Error: " + res["error"];

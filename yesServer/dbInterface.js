@@ -112,4 +112,4 @@ async function getAllKeys(tableName)
     return Object.keys(table);
 }
 
-module.exports = {initApp, tableExists, createTable, deleteTable, clearTable, addPair, getPair, updatePair, deletePair, getAllKeys};
+module.exports = {initApp, tableExists, createTable, deleteTable, clearTable, addPair, getPair, updatePair, deletePair, getAllKeys, _getTable};

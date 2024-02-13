@@ -58,18 +58,21 @@ const io = new Server(server, {
 });
 io.setMaxListeners(1000);
 
+var cookies = require("cookie-parser");
+app.use(cookies());
+
 app.get('/', (req, res) => {
     res.redirect('/index/index.html');
 });
 
-app.get('/*', (req, res) => {
+app.get('/*', async (req, res) => {
     let url = req.url;
     if (url.startsWith('/file/'))
     {
         url = url.substring(6);
         url = url.replace("..", "");
         console.log(`> Accessing "${url}"`)
-        fileUpload.sendFile(res, url);
+        await fileUpload.sendFile(req, res, url);
         return;
     }
 
@@ -108,7 +111,7 @@ async function startUp()
     await accountInterface.initApp(dbInterface);
     await securityInterface.initApp();
     await accountSystem.initApp(app, io, accountInterface, securityInterface, sessionSystem);
-    await fileUpload.initApp(app, io, accountInterface, securityInterface, sessionSystem, !USE_HTTPS);
+    await fileUpload.initApp(app, io, dbInterface, accountInterface, securityInterface, sessionSystem, !USE_HTTPS);
 
     if ((await accountInterface.getAllUsers()).length === 0)
     {
