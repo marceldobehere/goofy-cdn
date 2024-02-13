@@ -1,0 +1,45 @@
+* {
+    font-family: 'JetBrains Mono';
+    font-size: 30px;
+    transition: all 0.3s ease;
+}
+
+body {
+    background-color: #101020;
+    color: #EFEFFF;
+    font-family: 'JetBrains Mono';
+}
+
+h1 {
+    font-size: 2rem;
+    color: #E2E2FF;
+    display: block;
+    text-align: center;
+}
+
+button {
+    background-color: #405070;
+    color: #E0E0F0;
+}
+
+button:hover {
+    background-color: #506080;
+}
+
+@media (max-width: 1200px) {
+    * {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 800px) {
+    * {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 600px) {
+    * {
+        font-size: 13px;
+    }
+}

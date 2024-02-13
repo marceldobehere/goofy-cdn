@@ -1,0 +1,21 @@
+.goofy-container {
+    width: 40%;
+    margin: auto;
+    border: 2px solid #e0e0f0;
+    padding: 30px;
+}
+
+.goofy-container-2 {
+    width: 70%;
+    margin: auto;
+    align-content: center;
+}
+
+.goofy-container-2 input {
+    width: 100%;
+}
+
+.goofy-container-2 button {
+    margin: auto;
+    display: block;
+}

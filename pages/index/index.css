@@ -1,0 +1,56 @@
+.goofy-container {
+    width: 80%;
+    margin: auto;
+    border: 2px solid #e0e0f0;
+}
+
+.goofy-container-2 {
+    width: 80%;
+    margin: auto;
+    align-content: center;
+}
+
+.goofy-container-3 {
+    width: 80%;
+    margin: auto;
+    align-content: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 20px;
+}
+
+#file_upload {
+    margin: auto;
+    display: block;
+    background-color: #405070;
+    color: #E0E0F0;
+}
+
+#btn-logout {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+}
+
+.goofy-center {
+    text-align: center;
+}
+
+.goofy-container-3 button {
+    font-size: 1.4rem;
+}
+
+
+#file-list {
+    list-style-type: square;
+    padding: 60px;
+}
+
+.goofy-pad {
+    padding-left: 20px;
+}
+
+a {
+    color: #A0A0F0;
+    font-weight: bold;
+}

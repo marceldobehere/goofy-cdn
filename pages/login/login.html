@@ -3,13 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
+    <link rel="stylesheet" href="/shared/css/style.css">
+    <link rel="stylesheet" href="./login.css">
+    <link href='https://fonts.googleapis.com/css?family=JetBrains Mono' rel='stylesheet'>
 </head>
 <body>
 <h1>Login</h1>
-<div class="login-box">
-    <input class="form-input-big" id="input-username" type="text" value="" placeholder="Enter your username"><br>
-    <input class="form-input-big" id="input-password" type="password" value="" placeholder="Enter your password"><br>
-    <button class="form-button-big" id="btn-login" onclick="doLogin()">Login</button>
+<br>
+<div class="goofy-container">
+    <div class="goofy-container-2">
+        <br>
+        <label for="input-username">Username:</label><br>
+        <input class="form-input-big" id="input-username" type="text" value="" placeholder="Enter your username"><br>
+
+        <br>
+        <label for="input-password">Password:</label><br>
+        <input class="form-input-big" id="input-password" type="password" value="" placeholder="Enter your password"><br>
+
+        <br>
+        <button class="form-button-big" id="btn-login" onclick="doLogin()">Login</button>
+        <br>
+    </div>
 </div>
 </body>
 <script src="/socket.io/socket.io.js"></script>

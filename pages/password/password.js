@@ -8,11 +8,6 @@ let errText = urlParams.get("error");
 if (errText != null)
     errTextSpan.textContent = errText;
 
-// setPasswordInCookie("test1.abc", "Tesato!\"24!");
-// setPasswordInCookie("test2.abc", "Testo!!aa/(=/");
-// console.log(document.cookie);
-// console.log(getPasswordFromCookie("test1.abc"));
-// console.log(getPasswordFromCookie("test2.abc"));
 
 function urlEncode(str)
 {

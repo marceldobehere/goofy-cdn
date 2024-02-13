@@ -3,22 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>Goofy CDN</title>
+    <link rel="stylesheet" href="/shared/css/style.css">
+    <link rel="stylesheet" href="./index.css">
+    <link href='https://fonts.googleapis.com/css?family=JetBrains Mono' rel='stylesheet'>
 </head>
 <body>
     <h1>Goofy CDN</h1>
-    <p>HELLO!</p>
-    <input id="file_upload" type="file"/><br>
-    <button onclick="upload(file_upload.files, undefined)">Upload</button>
-    <button onclick="uploadPassword()">Upload with pass</button>
-    <div>
-        <p>Files uploaded:</p>
-        <ul id="file-list">
-        </ul>
-    </div>
-
-    <br><br>
-    <hr>
     <button id="btn-logout" onclick="doLogout()">Logout</button>
+
+    <div class="goofy-container">
+        <div class="goofy-container-2">
+            <h2 class="goofy-center">Select File</h2>
+            <input id="file_upload" type="file"/><br>
+            <div class="goofy-container-3">
+                <button onclick="upload(file_upload.files, undefined)">Upload</button>
+                <button onclick="uploadPassword()">Upload with pass</button>
+            </div>
+            <br>
+        </div>
+        <hr>
+        <div>
+            <h2 class="goofy-pad">Files uploaded:</h2>
+            <ul id="file-list">
+            </ul>
+        </div>
+    </div>
+    <br><br><br><br>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/shared/js/globSocket.js"></script>
