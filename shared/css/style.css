@@ -8,6 +8,7 @@ body {
     background-color: #101020;
     color: #EFEFFF;
     font-family: 'JetBrains Mono';
+    min-height: 100vh;
 }
 
 h1 {
