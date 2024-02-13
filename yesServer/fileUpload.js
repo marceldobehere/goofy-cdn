@@ -1,15 +1,16 @@
+const fs = require('fs');
+const resolve = require('path').resolve;
+
 let app;
 let io;
 let accountInterface;
 let securityInterface;
 let sessionSystem;
 let dbInterface;
-let fs = require('fs');
-const filesFolder = "./data/files/";
-let urlBase = "http://localhost/file/";
-const resolve = require('path').resolve;
 
 let passwordEntries;
+const filesFolder = "./data/files/";
+let urlBase = "http://localhost/file/";
 
 async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInterface, _sessionSystem, local)
 {
@@ -19,7 +20,6 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
     accountInterface = _accountInterface;
     securityInterface = _securityInterface;
     sessionSystem = _sessionSystem;
-
     urlBase = local ? "http://localhost/file/" : "https://cdn.marceldobehere.com/file/";
 
     if (!fs.existsSync(filesFolder))
@@ -27,13 +27,10 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
 
     if (! await dbInterface.tableExists('file-passwords'))
         await dbInterface.createTable('file-passwords');
-    //await dbInterface.addPair('file-passwords', 'test', 'test');
     passwordEntries = await dbInterface._getTable('file-passwords');
-
 
     io.on("connection", (socket) => {
         socket.on("upload", async (file) => {
-
             let session = sessionSystem.getSessionBySocket(socket);
             if (session === undefined)
                 return socket.emit({ message: "invalid session" });
@@ -43,11 +40,9 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
             if (file.password != undefined && typeof file.password !== "string")
                 return socket.emit({ message: "invalid password type" });
 
-            console.log("> UPLOAD!");
-            //console.log(file); // data:application/x-zip-compressed;base64,U...
+            console.log("> UPLOAD STARTED!");
 
             let buff = Buffer.from(file.data, 'base64');
-            //let data = buff.toString('binary');
 
             let filename = file.filename;
             let ext = filename.split('.').pop();
@@ -61,17 +56,16 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
             {
                 let obj = await securityInterface.hashPassword(file.password);
                 passwordEntries[newFilename] = obj;
-                dbInterface.addPair('file-passwords', newFilename, obj);
+                await dbInterface.addPair('file-passwords', newFilename, obj);
             }
             else
             {
                 let obj = {};
                 passwordEntries[newFilename] = obj;
-                dbInterface.addPair('file-passwords', newFilename, obj);
+                await dbInterface.addPair('file-passwords', newFilename, obj);
             }
 
             console.log(`> UPLOAD DONE TO "${urlBase+newFilename}"!`);
-
             socket.emit('upload', {url:urlBase+newFilename});
         });
     });
@@ -99,15 +93,26 @@ async function sendFile(req, res, filename)
     let entry = passwordEntries[filename];
     if (entry === undefined)
     {
-        console.log(`> ERROR: File "${filename}" not found!`);
-        res.status(404).send("File not found");
-        return;
+        if (fs.existsSync(filesFolder + filename))
+        {
+            console.log(`> File "${filename}" found but has no entry!`);
+            let obj = {};
+            passwordEntries[filename] = obj;
+            await dbInterface.addPair('file-passwords', filename, obj);
+            entry = obj;
+            console.log(`> Created entry for "${filename}"!`);
+        }
+        else
+        {
+            console.log(`> ERROR: File "${filename}" not found!`);
+            res.status(404).send("File not found");
+            return;
+        }
     }
-    console.log(`> File "${filename}" found: `, entry);
+
     if (entry.salt != undefined && entry.hash != undefined)
     {
         let cookies = req.cookies;
-        console.log(`> RES COOKIES: ${JSON.stringify(cookies)}`);
         if (cookies === undefined)
         {
             console.log(`> ERROR: No cookies found!`);
@@ -122,7 +127,6 @@ async function sendFile(req, res, filename)
         }
         try {
             let passwords = JSON.parse(cookies["passwords"]);
-            console.log(passwords);
 
             let password = passwords[filename];
             if (password === undefined)
@@ -154,9 +158,6 @@ async function sendFile(req, res, filename)
             res.redirect(`/password/password.html?file=${filename}&error=Invalid%20passwords`);
             return;
         }
-
-
-
     }
     else
     {

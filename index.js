@@ -122,10 +122,7 @@ async function startUp()
 
         let res = await accountSystem.registerUser(username, password);
         console.log(res);
-
-        //registerUser
     }
-
 
     let port = USE_HTTPS ? 443 : 80;
     server.listen(port, () => {

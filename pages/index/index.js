@@ -90,3 +90,11 @@ async function upload(files, pass) {
         }
     }
 }
+
+async function uploadPassword()
+{
+    let input = prompt('Enter Password');
+    if (input == null || input === "")
+        return;
+    await upload(file_upload.files, input);
+}

@@ -1,6 +1,5 @@
 let dbInterface;
 
-
 const defaultUserObject = {
     "username": "",
     "userId": "",
@@ -17,11 +16,9 @@ async function initApp(_dbInterface)
 
     await createUser("test1234", {
         "username": "Testo",
-        "email": "test@test.com",
         "userId": "test1234",
         "password-hash": "test",
         "password-salt": "test",
-        "rank": 0,
     });
 
     await deleteUser("test1234");
