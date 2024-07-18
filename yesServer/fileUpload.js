@@ -49,15 +49,16 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
 
             // generate random str id
             let id = `id-${securityInterface.getRandomInt(100000, 10000000000)}`;
+            let chunkCount = Math.ceil(size / chunkSize);
             session["fileUploads"][id] = {
                 filename: filename,
                 size: size,
-                chunkCount: Math.ceil(size / chunkSize),
+                chunkCount: chunkCount,
                 password: password,
                 data: []
             };
 
-            console.log("> START UPLOAD!", session["fileUploads"][id]);
+            console.log(`> START UPLOAD FOR FILE \"${filename}\" (Password: ${password != undefined}, Chunk Count: ${chunkCount})!`);
             return socket.emit("start-upload", { id:id, chunkSize:chunkSize});
         });
 
