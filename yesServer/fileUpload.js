@@ -11,6 +11,7 @@ let dbInterface;
 let passwordEntries;
 const filesFolder = "./data/files/";
 let urlBase = "http://localhost/file/";
+const chunkSize = 2 * 1024 * 1024; // 2MB
 
 async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInterface, _sessionSystem, local)
 {
@@ -30,21 +31,70 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
     passwordEntries = await dbInterface._getTable('file-passwords');
 
     io.on("connection", (socket) => {
-        socket.on("upload", async (file) => {
+
+        socket.on("start-upload", async (data) => {
             let session = sessionSystem.getSessionBySocket(socket);
             if (session === undefined)
-                return socket.emit({ message: "invalid session" });
+                return socket.emit("start-upload", { error: "invalid session" });
 
-            if (file === undefined || file.filename === undefined || file.data === undefined)
-                return socket.emit({ message: "invalid file/data" });
-            if (file.password != undefined && typeof file.password !== "string")
-                return socket.emit({ message: "invalid password type" });
+            let filename = data.filename;
+            if (filename === undefined)
+                return socket.emit("start-upload", { error: "invalid filename" });
+            let size = data.size;
+            if (size === undefined)
+                return socket.emit("start-upload", { error: "invalid size" });
+            let password = data.password;
+            if (password != undefined && typeof password !== "string")
+                return socket.emit("start-upload", { error: "invalid password type" });
 
-            console.log("> UPLOAD STARTED!");
+            // generate random str id
+            let id = `id-${securityInterface.getRandomInt(100000, 10000000000)}`;
+            session["fileUploads"][id] = {
+                filename: filename,
+                size: size,
+                chunkCount: Math.ceil(size / chunkSize),
+                password: password,
+                data: []
+            };
 
-            let buff = Buffer.from(file.data, 'base64');
+            console.log("> START UPLOAD!", session["fileUploads"][id]);
+            return socket.emit("start-upload", { id:id, chunkSize:chunkSize});
+        });
 
-            let filename = file.filename;
+        socket.on("do-upload", async (data) => {
+            let session = sessionSystem.getSessionBySocket(socket);
+            if (session === undefined)
+                return socket.emit("do-upload", {error: "invalid session" });
+            // console.log("> DO UPLOAD!", data);
+
+            let id = data.id;
+            if (id === undefined)
+                return socket.emit("do-upload", { error: "invalid id" });
+            let chunkIndex = data.chunkIndex;
+            if (chunkIndex === undefined)
+                return socket.emit("do-upload", { error: "invalid chunkIndex" });
+            let dataChunk = data.data;
+            if (dataChunk === undefined)
+                return socket.emit("do-upload", { error: "invalid chunk" });
+            let upload = session["fileUploads"][id];
+            if (upload === undefined)
+                return socket.emit("do-upload", { error: "invalid upload" });
+            if (chunkIndex >= upload.chunkCount || chunkIndex < 0)
+                return socket.emit("do-upload", { error: "invalid chunkIndex" });
+            if (dataChunk.length > chunkSize)
+                return socket.emit("do-upload", { error: "invalid chunk size" });
+
+            //console.log(`> UPLOADING CHUNK ${chunkIndex}!`);
+            upload.data[chunkIndex] = dataChunk;
+
+            if (chunkIndex !== upload.chunkCount - 1)
+                return socket.emit("do-upload", { status: "ok", left: ((upload.chunkCount - 1) - chunkIndex)});
+
+
+            let buff = Buffer.concat(upload["data"]);
+            console.log(buff);
+
+            let filename = upload.filename;
             let ext = filename.split('.').pop();
             if (ext === filename)
                 ext = "bin";
@@ -52,9 +102,9 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
             let newFilename = getRandomFreeFileName(ext);
             writeFile(newFilename, buff);
 
-            if (file.password != undefined)
+            if (upload.password != undefined)
             {
-                let obj = await securityInterface.hashPassword(file.password);
+                let obj = await securityInterface.hashPassword(upload.password);
                 passwordEntries[newFilename] = obj;
                 await dbInterface.addPair('file-passwords', newFilename, obj);
             }
@@ -65,9 +115,61 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
                 await dbInterface.addPair('file-passwords', newFilename, obj);
             }
 
+            delete session["fileUploads"][id];
+            console.log(session["fileUploads"]);
+
+            console.log(`> UPLOADING \"${upload.filename}\" (${Math.floor((upload.size * 100) / (1024 * 1024)) / 100} MB) DONE!`);
             console.log(`> UPLOAD DONE TO "${urlBase+newFilename}"!`);
-            socket.emit('upload', {url:urlBase+newFilename});
+            return socket.emit("do-upload", { status: "done", url: urlBase + newFilename });
         });
+
+        socket.on("disconnect", async () => {
+            console.log("> DISCONNECTED!");
+            let session = sessionSystem.getSessionBySocket(socket);
+            if (session === undefined)
+                return;
+
+            session["fileUploads"] = {};
+        });
+
+        // socket.on("upload", async (file) => {
+        //     let session = sessionSystem.getSessionBySocket(socket);
+        //     if (session === undefined)
+        //         return socket.emit("upload", { error: "invalid session" });
+        //
+        //     if (file === undefined || file.filename === undefined || file.data === undefined)
+        //         return socket.emit("upload", { error: "invalid file/data" });
+        //     if (file.password != undefined && typeof file.password !== "string")
+        //         return socket.emit("upload", { error: "invalid password type" });
+        //
+        //     console.log("> UPLOAD STARTED!");
+        //
+        //     let buff = Buffer.from(file.data, 'base64');
+        //
+        //     let filename = file.filename;
+        //     let ext = filename.split('.').pop();
+        //     if (ext === filename)
+        //         ext = "bin";
+        //
+        //     let newFilename = getRandomFreeFileName(ext);
+        //     writeFile(newFilename, buff);
+        //
+        //     if (file.password != undefined)
+        //     {
+        //         let obj = await securityInterface.hashPassword(file.password);
+        //         passwordEntries[newFilename] = obj;
+        //         await dbInterface.addPair('file-passwords', newFilename, obj);
+        //     }
+        //     else
+        //     {
+        //         let obj = {};
+        //         passwordEntries[newFilename] = obj;
+        //         await dbInterface.addPair('file-passwords', newFilename, obj);
+        //     }
+        //
+        //     console.log(`> UPLOAD DONE TO "${urlBase+newFilename}"!`);
+        //     socket.emit('upload', {url:urlBase+newFilename});
+        // });
     });
 }
 

@@ -90,6 +90,7 @@ async function loginUser(username, password, socket)
             socket: socket,
             userId: userObject.userId,
             sessionId: sessionId,
+            fileUploads: {}
         });
         return sessionId;
     }
