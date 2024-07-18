@@ -54,7 +54,7 @@ else
 
 const { Server } = require("socket.io");
 const io = new Server(server, {
-    maxHttpBufferSize: 2e8
+    maxHttpBufferSize: 20*1024*1024
 });
 io.setMaxListeners(1000);
 
