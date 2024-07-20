@@ -11,7 +11,7 @@ let dbInterface;
 let passwordEntries;
 const filesFolder = "./data/files/";
 let urlBase = "http://localhost/file/";
-const chunkSize = 5 * 1024 * 1024; // 2MB
+const chunkSize = 2 * 1024 * 1024; // 2MB
 
 async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInterface, _sessionSystem, local)
 {
