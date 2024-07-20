@@ -105,13 +105,16 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
 
             if (upload.password != undefined)
             {
-                let obj = await securityInterface.hashPassword(upload.password);
+                let obj = {
+                    password: await securityInterface.hashPassword(upload.password),
+                    filename
+                };
                 passwordEntries[newFilename] = obj;
                 await dbInterface.addPair('file-passwords', newFilename, obj);
             }
             else
             {
-                let obj = {};
+                let obj = {filename};
                 passwordEntries[newFilename] = obj;
                 await dbInterface.addPair('file-passwords', newFilename, obj);
             }
@@ -132,45 +135,6 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
 
             session["fileUploads"] = {};
         });
-
-        // socket.on("upload", async (file) => {
-        //     let session = sessionSystem.getSessionBySocket(socket);
-        //     if (session === undefined)
-        //         return socket.emit("upload", { error: "invalid session" });
-        //
-        //     if (file === undefined || file.filename === undefined || file.data === undefined)
-        //         return socket.emit("upload", { error: "invalid file/data" });
-        //     if (file.password != undefined && typeof file.password !== "string")
-        //         return socket.emit("upload", { error: "invalid password type" });
-        //
-        //     console.log("> UPLOAD STARTED!");
-        //
-        //     let buff = Buffer.from(file.data, 'base64');
-        //
-        //     let filename = file.filename;
-        //     let ext = filename.split('.').pop();
-        //     if (ext === filename)
-        //         ext = "bin";
-        //
-        //     let newFilename = getRandomFreeFileName(ext);
-        //     writeFile(newFilename, buff);
-        //
-        //     if (file.password != undefined)
-        //     {
-        //         let obj = await securityInterface.hashPassword(file.password);
-        //         passwordEntries[newFilename] = obj;
-        //         await dbInterface.addPair('file-passwords', newFilename, obj);
-        //     }
-        //     else
-        //     {
-        //         let obj = {};
-        //         passwordEntries[newFilename] = obj;
-        //         await dbInterface.addPair('file-passwords', newFilename, obj);
-        //     }
-        //
-        //     console.log(`> UPLOAD DONE TO "${urlBase+newFilename}"!`);
-        //     socket.emit('upload', {url:urlBase+newFilename});
-        // });
     });
 }
 
@@ -213,7 +177,18 @@ async function sendFile(req, res, filename)
         }
     }
 
-    if (entry.salt != undefined && entry.hash != undefined)
+    if (entry["hash"])
+        entry = {password:entry};
+    let downloadFilename = entry["filename"];
+    if (!downloadFilename)
+        downloadFilename = filename;
+    console.log(`> DOWNLOAD FILENAME \"${downloadFilename}\"`);
+
+    let entryPW = entry["password"];
+    if (!entryPW)
+        entryPW = {};
+
+    if (entryPW.salt != undefined && entryPW.hash != undefined)
     {
         let cookies = req.cookies;
         if (cookies === undefined)
@@ -239,13 +214,14 @@ async function sendFile(req, res, filename)
                 return;
             }
 
-            if (await securityInterface.checkPassword(password, entry.salt, entry.hash))
+            if (await securityInterface.checkPassword(password, entryPW.salt, entryPW.hash))
             {
                 let filePath = filesFolder + filename;
                 filePath = resolve(filePath);
                 console.log(`> Sending file "${filePath}")`)
 
-                res.sendFile(filePath);
+                //res.sendFile(filePath);
+                res.download(filePath, downloadFilename);
                 return;
             }
             else
@@ -268,7 +244,8 @@ async function sendFile(req, res, filename)
         filePath = resolve(filePath);
         console.log(`> Sending passwordless file "${filePath}")`)
 
-        res.sendFile(filePath);
+        //res.sendFile(filePath);
+        res.download(filePath, downloadFilename);
     }
 }
 
