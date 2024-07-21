@@ -96,6 +96,11 @@ async function uploadFile(file, pass, element)
         console.log("Uploading file: ", file);
         let filename = file.name;
 
+        if (file.size == 0) {
+            lockUpload.disable();
+            return {error: "File is empty"};
+        }
+
         // instead of reading the whole file, we read it chunk by chunk and upload each chunk
         // this way we can handle large files
         // and also log the progress
@@ -205,6 +210,7 @@ async function upload(files, pass) {
         {
             fLink.textContent = "Uploaded! ";
             fLink.href = res["url"];
+            fLink.target = "_blank";
         }
     }
 }

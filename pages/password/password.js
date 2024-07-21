@@ -67,3 +67,4 @@ async function openFile()
 
 let inputPassword = document.getElementById("input-password");
 attachOnEnterHandler(inputPassword, openFile);
+inputPassword.focus();

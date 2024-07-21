@@ -220,8 +220,9 @@ async function sendFile(req, res, filename)
                 filePath = resolve(filePath);
                 console.log(`> Sending file "${filePath}")`)
 
-                //res.sendFile(filePath);
-                res.download(filePath, downloadFilename);
+                res.set('Content-Disposition', `inline; filename="${downloadFilename}"`);
+                res.sendFile(filePath, {headers:{filename:`"${downloadFilename}"`}});
+                //res.download(filePath, downloadFilename);
                 return;
             }
             else
@@ -244,8 +245,10 @@ async function sendFile(req, res, filename)
         filePath = resolve(filePath);
         console.log(`> Sending passwordless file "${filePath}")`)
 
-        //res.sendFile(filePath);
-        res.download(filePath, downloadFilename);
+        // might treat some files differently?
+        res.set('Content-Disposition', `inline; filename="${downloadFilename}"`);
+        res.sendFile(filePath, {headers:{filename:`"${downloadFilename}"`}});
+        //res.download(filePath, downloadFilename);
     }
 }
 
