@@ -89,7 +89,7 @@ const lockUpload = new AsyncLock();
 
 
 
-async function uploadFile(file, pass, element)
+async function uploadFile(file, pass, element, LIVE)
 {
     await lockUpload.enable();
     try {
@@ -110,7 +110,7 @@ async function uploadFile(file, pass, element)
         // at the last chunk we get the url of the uploaded file
 
         // Prep file object
-        let fileObj = {"filename":filename, "size": file.size};
+        let fileObj = {"filename":filename, "size": file.size, "live": !!LIVE};
         if (pass != undefined)
             fileObj["password"] = pass;
 
@@ -178,7 +178,7 @@ async function uploadFile(file, pass, element)
     lockUpload.disable();
 }
 
-async function upload(files, pass) {
+async function upload(files, pass, LIVE) {
     if (files.length === 0)
         return alert('No files selected!');
     for (let i = 0; i < files.length; i++)
@@ -199,7 +199,7 @@ async function upload(files, pass) {
         fLink.textContent = "Uploading...";
         fLink.href = "/";
 
-        let res = await uploadFile(file, pass, fLink);
+        let res = await uploadFile(file, pass, fLink, LIVE);
         console.log("> Upload res:", res);
         if (res["error"] != undefined)
         {
@@ -215,10 +215,17 @@ async function upload(files, pass) {
     }
 }
 
+async function uploadLive(files) {
+    if (files.length !== 1)
+        return alert('No files selected!');
+
+    await upload(file_upload.files, undefined, true);
+}
+
 async function uploadPassword()
 {
     let input = prompt('Enter Password');
     if (input == null || input === "")
         return;
-    await upload(file_upload.files, input);
+    await upload(file_upload.files, input, false);
 }

@@ -67,6 +67,13 @@ app.get('/', (req, res) => {
 
 app.get('/*', async (req, res) => {
     let url = req.url;
+
+    if (url.startsWith("/live")) {
+        console.log(`> Accessing Live Feed`)
+        await fileUpload.sendFile(req, res, "live.mp4");
+        return;
+    }
+
     if (url.startsWith('/file/'))
     {
         url = url.substring(6);
@@ -124,7 +131,7 @@ async function startUp()
         console.log(res);
     }
 
-    let port = USE_HTTPS ? 443 : 80;
+    let port = USE_HTTPS ? 443 : 8080;
     server.listen(port, () => {
         console.log('> Started server on *:'+port);
     });

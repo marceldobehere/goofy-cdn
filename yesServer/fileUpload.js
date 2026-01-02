@@ -46,6 +46,7 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
             let password = data.password;
             if (password != undefined && typeof password !== "string")
                 return socket.emit("start-upload", { error: "invalid password type" });
+            let live = !!data.live;
 
             // generate random str id
             let id = `id-${securityInterface.getRandomInt(100000, 10000000000)}`;
@@ -55,6 +56,7 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
                 size: size,
                 chunkCount: chunkCount,
                 password: password,
+                live: live,
                 data: []
             };
 
@@ -100,7 +102,7 @@ async function initApp(_app, _io, _dbInterface, _accountInterface, _securityInte
             if (ext === filename)
                 ext = "bin";
 
-            let newFilename = getRandomFreeFileName(ext);
+            let newFilename = upload.live ? "live.mp4" : getRandomFreeFileName(ext);
             writeFile(newFilename, buff);
 
             if (upload.password != undefined)
@@ -143,7 +145,7 @@ function getRandomFreeFileName(ext)
     while (true)
     {
         let num = securityInterface.getRandomInt(100000, 10000000000);
-        let filename =num + "." + ext;
+        let filename = num + "." + ext;
         let filePath = filesFolder + filename;
         if (!fs.existsSync(filePath))
             return filename;
