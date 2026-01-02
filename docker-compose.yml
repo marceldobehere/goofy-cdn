@@ -10,6 +10,8 @@ services:
       - "nginx-router_default"
       - "default"
     restart: always
+    ports:
+      - "12370:443"
 
 volumes:
   data:
